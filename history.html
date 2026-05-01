@@ -1,0 +1,59 @@
+{% extends 'detection/base.html' %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1>Detection History</h1>
+            <p style="color: var(--text-light);">Browse and manage your previous crop analysis reports.</p>
+        </div>
+        <a href="{% url 'export_csv' %}" class="btn btn-outline">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+        </a>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Preview</th>
+                    <th>Date</th>
+                    <th>Crop</th>
+                    <th>Diagnosis</th>
+                    <th>Confidence</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in detections %}
+                <tr>
+                    <td><img src="{{ d.image.url }}" alt="Preview" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px;"></td>
+                    <td>{{ d.created_at|date:"M d, Y" }}</td>
+                    <td>{{ d.crop_type }}</td>
+                    <td>
+                        <span class="badge {% if d.disease == 'Healthy' %}badge-healthy{% else %}badge-warning{% endif %}">
+                            {{ d.disease }}
+                        </span>
+                    </td>
+                    <td>{{ d.confidence }}%</td>
+                    <td>
+                        <div style="display: flex; gap: 1rem;">
+                            <a href="{% url 'results' d.pk %}" style="color: var(--primary); font-weight: 600; text-decoration: none;">View</a>
+                            <a href="{% url 'report_pdf' d.pk %}" style="color: var(--text-light); text-decoration: none;" target="_blank">PDF</a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 4rem;">
+                        <p style="color: var(--text-light); margin-bottom: 1rem;">No detection history found.</p>
+                        <a href="{% url 'upload' %}" class="btn btn-primary">Analyze Your First Crop</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

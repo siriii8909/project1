@@ -1,0 +1,49 @@
+{% extends 'detection/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="hero">
+    <h1>Smart Crop Diagnosis</h1>
+    <p>Upload a photo of your crop to identify diseases, weeds, and get professional treatment recommendations in seconds.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center;">
+        <a href="{% url 'upload' %}" class="btn btn-primary">Start Detection</a>
+        <a href="{% url 'history' %}" class="btn btn-outline">View History</a>
+    </div>
+</section>
+
+<div class="card">
+    <h2>Recent Detections</h2>
+    <div style="overflow-x: auto;">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Crop</th>
+                    <th>Diagnosis</th>
+                    <th>Confidence</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in latest_detections %}
+                <tr>
+                    <td>{{ d.created_at|date:"M d, Y" }}</td>
+                    <td>{{ d.crop_type }}</td>
+                    <td>
+                        <span class="badge {% if d.disease == 'Healthy' %}badge-healthy{% else %}badge-warning{% endif %}">
+                            {{ d.disease }}
+                        </span>
+                    </td>
+                    <td>{{ d.confidence }}%</td>
+                    <td><a href="{% url 'results' d.pk %}" style="color: var(--primary);">View</a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem;">No detections yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: crop-detection
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn cropdetect.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"

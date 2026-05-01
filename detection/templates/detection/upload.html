@@ -1,0 +1,59 @@
+{% extends 'detection/base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <h2 style="margin-bottom: 1.5rem;">New Crop Analysis</h2>
+        <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            <div class="upload-area" id="dropZone">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 1rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p>Click to upload or drag and drop</p>
+                <p style="font-size: 0.875rem; color: #94a3b8;">PNG, JPG or JPEG (max. 10MB)</p>
+                <input type="file" name="image" id="id_image" hidden required accept="image/*">
+            </div>
+            <div id="previewContainer" style="display: none; margin-top: 1.5rem;">
+                <img id="imagePreview" src="#" alt="Preview" style="max-width: 100%; border-radius: var(--radius); box-shadow: var(--shadow);">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1.5rem; justify-content: center;">
+                Analyze Image
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('id_image');
+    const previewContainer = document.getElementById('previewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+
+    dropZone.onclick = () => fileInput.click();
+
+    fileInput.onchange = (e) => {
+        const [file] = fileInput.files;
+        if (file) {
+            imagePreview.src = URL.createObjectURL(file);
+            previewContainer.style.display = 'block';
+            dropZone.style.display = 'none';
+        }
+    };
+
+    dropZone.ondragover = (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = 'var(--primary)';
+        dropZone.style.backgroundColor = '#f0fdf4';
+    };
+
+    dropZone.ondragleave = () => {
+        dropZone.style.borderColor = '#cbd5e1';
+        dropZone.style.backgroundColor = 'transparent';
+    };
+
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    };
+</script>
+{% endblock %}
