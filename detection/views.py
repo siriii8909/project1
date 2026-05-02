@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from django.contrib.auth import login
 from django.contrib import messages
 from .models import Detection
@@ -93,6 +94,45 @@ def export_csv(request):
     response['Content-Disposition'] = 'attachment; filename="detections_history.csv"'
     df.to_csv(path_or_buf=response, index=False)
     return response
+
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import Count
+from datetime import timedelta
+from django.utils import timezone
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def admin_dashboard(request):
+    # Statistics
+    total_detections = Detection.objects.count()
+    total_users = User.objects.count()
+    
+    # Recent activity (last 30 days)
+    last_30_days = timezone.now() - timedelta(days=30)
+    recent_detections_count = Detection.objects.filter(created_at__gte=last_30_days).count()
+    
+    # User List with Upload Counts
+    users_with_counts = User.objects.annotate(upload_count=Count('detection')).order_by('-upload_count')
+    
+    # Most common crops
+    top_crops = Detection.objects.values('crop_type').annotate(count=Count('crop_type')).order_by('-count')[:5]
+    
+    # Most common diseases
+    top_diseases = Detection.objects.values('disease').annotate(count=Count('disease')).order_by('-count')[:5]
+    
+    # All detections for the table
+    all_detections = Detection.objects.all().order_by('-created_at')
+    
+    context = {
+        'total_detections': total_detections,
+        'total_users': total_users,
+        'recent_detections_count': recent_detections_count,
+        'users_with_counts': users_with_counts,
+        'top_crops': top_crops,
+        'top_diseases': top_diseases,
+        'all_detections': all_detections,
+    }
+    return render(request, 'detection/admin_dashboard.html', context)
 
 def register(request):
     if request.method == 'POST':

@@ -10,4 +10,5 @@ urlpatterns = [
     path('export/csv/', views.export_csv, name='export_csv'),
     path('accounts/', include('django.contrib.auth.urls')),
     path('register/', views.register, name='register'),
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
 ]
